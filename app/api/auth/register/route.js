@@ -5,9 +5,11 @@ import User from "@/models/User";
 
 export async function POST(req) {
   try {
+
     await connectDB();
 
-    const { name, email, password } = await req.json();
+    const body = await req.json();
+    const { name, email, password } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -27,23 +29,25 @@ export async function POST(req) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await User.create({
+    const user = await User.create({
       name,
       email,
       password: hashedPassword
     });
 
     return NextResponse.json(
-      { message: "User registered successfully" },
+      { message: "User registered successfully", user },
       { status: 201 }
     );
 
   } catch (error) {
+
     console.log(error);
 
     return NextResponse.json(
       { message: "Server error" },
       { status: 500 }
     );
+
   }
 }
