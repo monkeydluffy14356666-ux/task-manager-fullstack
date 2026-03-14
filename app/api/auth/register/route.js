@@ -1,18 +1,41 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
-import User from "@/models/User";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
+
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!mongoose.connections[0].readyState) {
+  mongoose.connect(MONGO_URI);
+}
+
+const UserSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  password: String,
+});
+
+const User =
+  mongoose.models.User || mongoose.model("User", UserSchema);
 
 export async function POST(req) {
   try {
-    const { name, email, password } = await req.json();
+    const body = await req.json();
+    const { name, email, password } = body;
 
-    await connectDB();
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { message: "All fields required" },
+        { status: 400 }
+      );
+    }
 
-    const existing = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
-    if (existing) {
-      return NextResponse.json({ message: "User already exists" }, { status: 400 });
+    if (existingUser) {
+      return NextResponse.json(
+        { message: "User already exists" },
+        { status: 400 }
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -23,9 +46,13 @@ export async function POST(req) {
       password: hashedPassword,
     });
 
-    return NextResponse.json({ message: "User created successfully" });
-
+    return NextResponse.json({
+      message: "User created successfully",
+    });
   } catch (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { message: error.message },
+      { status: 500 }
+    );
   }
 }

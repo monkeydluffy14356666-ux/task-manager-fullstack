@@ -3,74 +3,95 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function Register(){
-
+export default function Register() {
   const router = useRouter();
 
-  const [name,setName] = useState("");
-  const [email,setEmail] = useState("");
-  const [password,setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleRegister = async () => {
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
 
-    const res = await fetch("/api/auth/register",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json"
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-      body:JSON.stringify({name,email,password})
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+      }),
     });
 
     const data = await res.json();
 
-    if(res.ok){
+    if (res.ok) {
+      alert("User Registered");
       router.push("/login");
-    }else{
+    } else {
       alert(data.message);
     }
-
   };
 
-  return(
-
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-slate-900 to-slate-700">
-
-      <div className="bg-white p-8 rounded-xl shadow-xl w-80">
-
-        <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Register
-        </h2>
+  return (
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        background:
+          "linear-gradient(135deg,#0f172a,#334155)",
+      }}
+    >
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          background: "#fff",
+          padding: "30px",
+          borderRadius: "10px",
+          width: "300px",
+        }}
+      >
+        <h2 style={{ textAlign: "center" }}>Register</h2>
 
         <input
           placeholder="Name"
-          onChange={(e)=>setName(e.target.value)}
-          className="w-full border border-gray-300 p-2 mb-3 rounded text-black focus:ring-2 focus:ring-blue-500"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{ width: "100%", marginBottom: "10px", padding: "10px" }}
         />
 
         <input
           placeholder="Email"
-          onChange={(e)=>setEmail(e.target.value)}
-          className="w-full border border-gray-300 p-2 mb-3 rounded text-black focus:ring-2 focus:ring-blue-500"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          style={{ width: "100%", marginBottom: "10px", padding: "10px" }}
         />
 
         <input
           type="password"
           placeholder="Password"
-          onChange={(e)=>setPassword(e.target.value)}
-          className="w-full border border-gray-300 p-2 mb-6 rounded text-black focus:ring-2 focus:ring-blue-500"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{ width: "100%", marginBottom: "10px", padding: "10px" }}
         />
 
         <button
-          onClick={handleRegister}
-          className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 transition"
+          type="submit"
+          style={{
+            width: "100%",
+            padding: "10px",
+            background: "green",
+            color: "white",
+            border: "none",
+          }}
         >
           Register
         </button>
-
-      </div>
-
+      </form>
     </div>
-
   );
-
 }
