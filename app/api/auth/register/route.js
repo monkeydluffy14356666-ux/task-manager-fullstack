@@ -5,7 +5,6 @@ import User from "@/models/User";
 
 export async function POST(req) {
   try {
-
     await connectDB();
 
     const { name, email, password } = await req.json();
@@ -40,13 +39,11 @@ export async function POST(req) {
     );
 
   } catch (error) {
-
     console.log(error);
 
     return NextResponse.json(
       { message: "Server error" },
       { status: 500 }
     );
-
   }
 }
