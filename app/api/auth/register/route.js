@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -17,9 +17,9 @@ const UserSchema = new mongoose.Schema({
 const User =
   mongoose.models.User || mongoose.model("User", UserSchema);
 
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const body = await req.json();
+    const body = await request.json();
     const { name, email, password } = body;
 
     if (!name || !email || !password) {
@@ -29,26 +29,27 @@ export async function POST(req) {
       );
     }
 
-    const existingUser = await User.findOne({ email });
+    const existing = await User.findOne({ email });
 
-    if (existingUser) {
+    if (existing) {
       return NextResponse.json(
         { message: "User already exists" },
         { status: 400 }
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 10);
 
     await User.create({
       name,
       email,
-      password: hashedPassword,
+      password: hashed,
     });
 
     return NextResponse.json({
       message: "User created successfully",
     });
+
   } catch (error) {
     return NextResponse.json(
       { message: error.message },
