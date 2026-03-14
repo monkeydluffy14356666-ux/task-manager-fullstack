@@ -24,7 +24,12 @@ export default function Register() {
         body: JSON.stringify({ name, email, password }),
       });
 
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        throw new Error("Server returned invalid response");
+      }
 
       if (res.ok) {
         setIsError(false);
@@ -32,11 +37,11 @@ export default function Register() {
         setTimeout(() => router.push("/login"), 1500);
       } else {
         setIsError(true);
-        setMessage("❌ " + data.message);
+        setMessage("❌ " + (data.message || "Something went wrong"));
       }
-    } catch (err) {
+    } catch (err: any) {
       setIsError(true);
-      setMessage("❌ Something went wrong. Try again.");
+      setMessage("❌ " + err.message);
     } finally {
       setLoading(false);
     }
@@ -50,19 +55,16 @@ export default function Register() {
     border: "1px solid #ccc",
     borderRadius: "5px",
     fontSize: "14px",
-    outline: "none",
   };
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "linear-gradient(135deg, #0f172a, #334155)",
-      }}
-    >
+    <div style={{
+      height: "100vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      background: "linear-gradient(135deg, #0f172a, #334155)",
+    }}>
       <form
         onSubmit={handleSubmit}
         style={{
@@ -71,7 +73,6 @@ export default function Register() {
           borderRadius: "10px",
           width: "320px",
           boxSizing: "border-box",
-          overflow: "hidden",
           boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
         }}
       >
@@ -106,17 +107,17 @@ export default function Register() {
           required
         />
 
-        {/* ✅ Inline message — no alert() */}
         {message && (
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: "13px",
-              marginBottom: "10px",
-              color: isError ? "red" : "green",
-              fontWeight: "500",
-            }}
-          >
+          <p style={{
+            textAlign: "center",
+            fontSize: "13px",
+            marginBottom: "10px",
+            padding: "8px",
+            borderRadius: "5px",
+            background: isError ? "#fee2e2" : "#dcfce7",
+            color: isError ? "#dc2626" : "#16a34a",
+            fontWeight: "500",
+          }}>
             {message}
           </p>
         )}
@@ -127,7 +128,7 @@ export default function Register() {
           style={{
             width: "100%",
             padding: "10px",
-            background: loading ? "#86a887" : "green",
+            background: loading ? "#86a887" : "#16a34a",
             color: "white",
             border: "none",
             borderRadius: "5px",
@@ -135,7 +136,6 @@ export default function Register() {
             boxSizing: "border-box",
             fontSize: "15px",
             fontWeight: "600",
-            transition: "background 0.2s",
           }}
         >
           {loading ? "Registering..." : "Register"}
@@ -143,7 +143,7 @@ export default function Register() {
 
         <p style={{ textAlign: "center", marginTop: "15px", fontSize: "13px", color: "#555" }}>
           Already have an account?{" "}
-          <a href="/login" style={{ color: "green", fontWeight: "600" }}>
+          <a href="/login" style={{ color: "#16a34a", fontWeight: "600", textDecoration: "none" }}>
             Login
           </a>
         </p>
