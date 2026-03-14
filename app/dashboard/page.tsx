@@ -1,130 +1,96 @@
 "use client";
 
-import { useEffect,useState } from "react";
+import { useState } from "react";
 
 export default function Dashboard(){
 
-  const [tasks,setTasks] = useState<any[]>([]);
   const [title,setTitle] = useState("");
   const [description,setDescription] = useState("");
 
-  const fetchTasks = async ()=>{
+  const createTask = async (e:any)=>{
 
-    const res = await fetch("/api/tasks/list");
-    const data = await res.json();
+    e.preventDefault();
 
-    setTasks(data);
-
-  };
-
-  const createTask = async ()=>{
-
-    await fetch("/api/tasks/create",{
+    const res = await fetch("/api/tasks/create",{
       method:"POST",
       headers:{
         "Content-Type":"application/json"
       },
-      body:JSON.stringify({title,description})
+      body:JSON.stringify({
+        title,
+        description
+      })
     });
 
-    setTitle("");
-    setDescription("");
+    const data = await res.json();
 
-    fetchTasks();
-
-  };
-
-  const deleteTask = async (id:string)=>{
-
-    await fetch("/api/tasks/delete",{
-      method:"DELETE",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({taskId:id})
-    });
-
-    fetchTasks();
+    if(res.ok){
+      alert("Task Created");
+      setTitle("");
+      setDescription("");
+    }else{
+      alert(data.message);
+    }
 
   };
-
-  useEffect(()=>{
-    fetchTasks();
-  },[]);
 
   return(
 
-    <div className="min-h-screen bg-slate-900 p-10">
+    <div style={{
+      minHeight:"100vh",
+      background:"#0f172a",
+      display:"flex",
+      flexDirection:"column",
+      alignItems:"center",
+      padding:"40px"
+    }}>
 
-      <h1 className="text-3xl text-white mb-8">
-        Task Dashboard
-      </h1>
+      <h1 style={{color:"#fff"}}>Task Dashboard</h1>
 
-      <div className="bg-white p-6 rounded-xl shadow-md max-w-md mb-10">
-
-        <h3 className="text-xl font-semibold mb-4 text-black">
-          Create Task
-        </h3>
+      <form
+        onSubmit={createTask}
+        style={{
+          background:"#fff",
+          padding:"20px",
+          borderRadius:"10px",
+          width:"350px",
+          display:"flex",
+          flexDirection:"column",
+          gap:"10px",
+          marginTop:"20px"
+        }}
+      >
 
         <input
-          className="w-full border border-gray-300 p-2 mb-3 rounded text-black"
-          placeholder="Title"
+          placeholder="Task Title"
           value={title}
           onChange={(e)=>setTitle(e.target.value)}
+          required
         />
 
-        <input
-          className="w-full border border-gray-300 p-2 mb-4 rounded text-black"
-          placeholder="Description"
+        <textarea
+          placeholder="Task Description"
           value={description}
           onChange={(e)=>setDescription(e.target.value)}
+          required
         />
 
         <button
-          onClick={createTask}
-          className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
+          type="submit"
+          style={{
+            background:"#10b981",
+            color:"#fff",
+            border:"none",
+            padding:"10px",
+            borderRadius:"5px"
+          }}
         >
           Create Task
         </button>
 
-      </div>
-
-      <h2 className="text-white text-xl mb-4">
-        Your Tasks
-      </h2>
-
-      <div className="grid gap-4 max-w-md">
-
-        {tasks.map(task=>(
-
-          <div
-            key={task._id}
-            className="bg-white p-4 rounded shadow"
-          >
-
-            <h3 className="font-bold text-black">
-              {task.title}
-            </h3>
-
-            <p className="text-gray-700 mb-3">
-              {task.description}
-            </p>
-
-            <button
-              onClick={()=>deleteTask(task._id)}
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-            >
-              Delete
-            </button>
-
-          </div>
-
-        ))}
-
-      </div>
+      </form>
 
     </div>
 
   );
-
 }
