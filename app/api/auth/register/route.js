@@ -9,12 +9,11 @@ export async function POST(req) {
     await connectDB();
     const { name, email, password } = await req.json();
 
-    // Validation
     if (!name || !email || !password)
       return NextResponse.json({ error: "All fields required" }, { status: 400 });
 
     if (password.length < 6)
-      return NextResponse.json({ error: "Password must be at least 6 characters" }, { status: 400 });
+      return NextResponse.json({ error: "Password min 6 chars" }, { status: 400 });
 
     const exists = await User.findOne({ email });
     if (exists)
@@ -26,7 +25,7 @@ export async function POST(req) {
     const token = signToken({ userId: user._id, email: user.email });
 
     const response = NextResponse.json(
-      { message: "Registered successfully", user: { id: user._id, name: user.name, email: user.email } },
+      { message: "Registered!", user: { id: user._id, name: user.name, email: user.email } },
       { status: 201 }
     );
 
@@ -34,13 +33,13 @@ export async function POST(req) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
 
     return response;
   } catch (err) {
     console.error(err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
